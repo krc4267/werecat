@@ -14,17 +14,23 @@ class WerecatBase(App):
 
     def setup_gui(self):
         self.baselayout = BoxLayout(orientation='vertical')
-        self.controlbuttonbox = BoxLayout(orientation='horizontal')
+        self.controlbuttonbox = BoxLayout(orientation='horizontal',size=(1,60),size_hint=(1,None))
         self.stopbutton = Button(text='Stop')
         self.controlbuttonbox.add_widget(self.stopbutton)
         self.baselayout.add_widget(self.controlbuttonbox)
+        self.songslists = BoxLayout(orientation='horizontal')
+        self.songbox = BoxLayout(orientation='vertical',size_hint=(.7,1))
+        self.listbox = BoxLayout(orientation='vertical',size_hint=(.3,1))
+        self.baselayout.add_widget(self.songslists)
+        self.songslists.add_widget(self.listbox)
+        self.songslists.add_widget(self.songbox)
         for i in index.readlines():
-            self.baselayout.add_widget(self.create_songdisplay(i))
+            self.songbox.add_widget(self.create_songdisplay(i))
         return self.baselayout
 
     def create_songdisplay(self, song):
         self.songdata = song.split(';')
-        self.songdisplay = BoxLayout(orientation='horizontal',size=(800,40),size_hint=(None,None))
+        self.songdisplay = BoxLayout(orientation='horizontal',size=(1,40),size_hint=(1,None))
         print self.songdata[1]
         self.songtitle = Button(text=self.songdata[0])
         self.songdisplay.add_widget(self.songtitle)
