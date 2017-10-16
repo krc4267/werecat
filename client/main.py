@@ -4,6 +4,7 @@ from kivy.app import App
 from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.button import Button
 from kivy.uix.label import Label
+from kivy.uix.floatlayout import FloatLayout
 
 index = open('index', 'r')
 
@@ -23,15 +24,15 @@ class WerecatBase(App):
 
     def create_songdisplay(self, song):
         self.songdata = song.split(';')
-        self.songdisplay = BoxLayout(orientation='horizontal')
+        self.songdisplay = BoxLayout(orientation='horizontal',size=(800,40),size_hint=(None,None))
         print self.songdata[1]
-        self.songtitle = Button(text=self.songdata[0])
+        self.songtitle = Button(text=self.songdata[0],size=(200,40),size_hint=(None,None))
         self.songdisplay.add_widget(self.songtitle)
-        self.artist = Button(text=self.songdata[1])
+        self.artist = Button(text=self.songdata[1],size=(200,40),size_hint=(None,None))
         self.songdisplay.add_widget(self.artist)
-        self.album = Button(text=self.songdata[2])
+        self.album = Button(text=self.songdata[2],size=(200,40),size_hint=(None,None))
         self.songdisplay.add_widget(self.album)
-        self.duration = Label(text=self.songdata[3])
+        self.duration = Label(text=self.songdata[3],size=(200,40),size_hint=(None,None))
         self.songdisplay.add_widget(self.duration)
         return self.songdisplay
 
