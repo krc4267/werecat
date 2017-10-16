@@ -26,13 +26,13 @@ class WerecatBase(App):
         self.songdata = song.split(';')
         self.songdisplay = BoxLayout(orientation='horizontal',size=(800,40),size_hint=(None,None))
         print self.songdata[1]
-        self.songtitle = Button(text=self.songdata[0],size=(200,40),size_hint=(None,None))
+        self.songtitle = Button(text=self.songdata[0])
         self.songdisplay.add_widget(self.songtitle)
-        self.artist = Button(text=self.songdata[1],size=(200,40),size_hint=(None,None))
+        self.artist = Button(text=self.songdata[1])
         self.songdisplay.add_widget(self.artist)
-        self.album = Button(text=self.songdata[2],size=(200,40),size_hint=(None,None))
+        self.album = Button(text=self.songdata[2])
         self.songdisplay.add_widget(self.album)
-        self.duration = Label(text=self.songdata[3],size=(200,40),size_hint=(None,None))
+        self.duration = Label(text=self.songdata[3])
         self.songdisplay.add_widget(self.duration)
         return self.songdisplay
 
