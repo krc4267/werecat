@@ -1,7 +1,7 @@
 import os
 from time import sleep
 
-prefix='/home/krc/Downloads/'
+prefix='/home/krc/Projects/werecat/client/songs/'
 location = '/home/krc/Projects/werecat/server/'
 
 def play(song):
