@@ -1,3 +1,30 @@
+from __future__ import unicode_literals
+from kivy.support import install_twisted_reactor
+install_twisted_reactor()
+
+from twisted.internet import reactor, protocol
+
+class EchoClient(protocol.Protocol):
+    def connectionMade(self):
+        self.factory.app.on_connection(self.transport)
+    def dataReceived(self, data):
+        print data
+		
+class EchoClientFactory(protocol.ClientFactory):
+    protocol = EchoClient
+    def __init__(self, app):
+        self.app = app
+
+    def startedConnecting(self, connector):
+        print 'started connecting'
+
+    def clientConnectionLost(self, connector, reason):
+        print 'lost connection: '+reason
+
+    def clientConnectionFailed(self, connector, reason):
+        print 'connection failed: '+reason
+
+		
 import kivy
 import os
 
@@ -20,15 +47,22 @@ class WerecatBase(App):
         self.baselayout = BoxLayout(orientation='vertical',padding=10)
         self.controlbuttonbox = BoxLayout(orientation='horizontal',size=(1,60),size_hint=(1,None))
         self.songscroll = ScrollView(size_hint=(.7,1))
-        self.songbox = BoxLayout(orientation='vertical',size_hint=(.7,1))
-        self.listbox = BoxLayout(orientation='vertical',size_hint=(.3,1))
+        self.listscroll = ScrollView(size_hint=(.3,1))
+        self.songbox = BoxLayout(orientation='vertical',size_hint=(1,None))
+        self.listbox = BoxLayout(orientation='vertical',size_hint=(1,None))
         self.songslists = BoxLayout(orientation='horizontal')
         self.setup_controls()
         
+        self.listbox.bind(minimum_height=self.listbox.setter('height'))
+        self.songbox.bind(minimum_height=self.songbox.setter('height'))
+        
         self.baselayout.add_widget(self.controlbuttonbox)
         self.baselayout.add_widget(self.songslists)
-        self.songslists.add_widget(self.listbox)
-        self.songslists.add_widget(self.songbox)
+        self.songslists.add_widget(self.listscroll)
+        self.songslists.add_widget(self.songscroll)
+        
+        self.songscroll.add_widget(self.songbox)
+        self.listscroll.add_widget(self.listbox)
         
         self.render_listlist()
         
