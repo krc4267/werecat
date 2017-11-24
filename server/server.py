@@ -12,7 +12,7 @@ class Echo(protocol.Protocol):
         def runInThread(onExit, popenArgs):
             print 'gothere'
             print popenArgs
-            proc = subprocess.Popen(popenArgs, shell=True, env=dict(os.environ))
+            proc = subprocess.Popen(popenArgs,shell=True)
             proc.wait()
             onExit()
             return
@@ -24,16 +24,17 @@ class Echo(protocol.Protocol):
         
     def stopSong(self):
 		print 'stopping'
-		subprocess.call(('pkill', '-9','vlc')) #HACKY SHIT, DON'T DO THIS
+		os.system('tmux send-keys -t werecat ^C')
 		self.stopped = True
     
     def playSong(self, song):
-		d = dict(os.environ)
-		if self.playing:
-			subprocess.call(('pkill','-9','vlc')) #HACKY SHIT, DON'T DO THIS
-		songspath = '/home/krc/Projects/werecat/client/songs/'
-		self.popenAndCall(self.playNext,('cvlc','-v', '--play-and-exit', songspath+song+'.mp3'))
-		self.playing = True
+        self.current = song
+        d = dict(os.environ)
+        if self.playing:
+            os.system('tmux send-keys -t werecat q')
+        songspath = '/home/krc/legionwidemusic/'
+        self.popenAndCall(self.playNext,('gst-play-1.0 '+songspath+'*'+song.replace(' ','\ ')+'*'))
+        self.playing = True
 	
     def dataReceived(self, data):
         print 'received'+data
@@ -59,20 +60,47 @@ class Echo(protocol.Protocol):
             self.stopSong()
 		
         if data.split(':')[0] == 'start':
+            self.stopped = False
             self.playNext()
+        
+        if data.split(':')[0] == 'skip':
+            self.skipSong()
+            
+        if data.split(':')[0] == 'wants queue':
+            self.queuestr = 'queue:'
+            for i in self.queue:
+                self.queuestr = self.queuestr + i + ':'
+            print self.queuestr
+            self.transport.write(self.queuestr)
+        
+        if data.split(':')[0] == 'clear queue':
+            print 'clearing queue'
+            self.queue = []
+
+        if data.split(':')[0] == 'wants current':
+            print 'sending current'
+            self.transport.write('current:'+current)
+
             
     def playNext(self):
-		print 'playing next song'
-		if self.stopped:
-			pass
-			
-		if len(self.queue) == 0:
-			print 'cannot play next song as there is no such thing'
-			self.stopSong()
-			pass
-		else:
-			self.playSong(self.queue.pop(0))
-		
+        print 'playing next song'
+        if self.stopped:
+            return None
+            self.queuestr = 'queue:'
+            for i in self.queue:
+                self.queuestr = self.queuestr + i + ':'
+            print self.queuestr
+            self.transport.write(self.queuestr)
+        if len(self.queue) == 0:
+            print 'cannot play next song as there is no such thing'
+            self.stopSong()
+            pass
+        else:
+            self.playSong(self.queue.pop(0))
+            
+    def skipSong(self):
+        print 'skipping song'
+        os.system('tmux send-keys -t werecat ^C')
 	
     def addQueue(self, song, where=-1):
 		if where == -1:
@@ -82,7 +110,6 @@ class Echo(protocol.Protocol):
 		else:
 			print 'inserting '+song+' to queue at position '+str(where)
 			self.queue.insert(where, song)
-			
 			
 			
 			
