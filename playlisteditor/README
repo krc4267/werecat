@@ -1,0 +1,4 @@
+###
+This is a temporary hack of the client to give us a somewhat usable playlist editor
+(versus manually editing the lists..). The functionality will be integrated to the main
+client when time permits, but this should work (?) for now-ish. 
