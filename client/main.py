@@ -164,7 +164,12 @@ class WerecatBase(App):
         self.listbox.clear_widgets()
         for i in os.listdir(indexdir):
             self.listbox.add_widget(self.create_listdisplay(i))
-    
+            
+    def remove_from_playlist(self, instance, *args):
+        #shite gotta write THIS monstrosity now
+        print instance.id
+        pass
+				       	
     def edit_playlist(self, instance, *args):
         self.wcmode = 'editing'
         self.controlbuttonbox.clear_widgets()
@@ -177,11 +182,15 @@ class WerecatBase(App):
         print self.editlist
         self.editindex.close()
         self.editinglist = instance.id
+        self.trknumber = 1
         for i in self.editlist:
 			print i
-			self.editlistbutton = Button(text=i.split(';')[0], size=(1,40),size_hint=(1,None))
+			self.editlistbutton = Button(text=i.split(';')[0], size=(1,40),size_hint=(1,None), id=str(self.trknumber))
+			self.editlistbutton.bind(on_press=self.remove_from_playlist)
+			self.trknumber = self.trknumber + 1
 			self.queuebox.add_widget(self.editlistbutton)
-				       	
+	
+
     def stupid_intermediary_function(self, queue):
         self.render_queuelist(queue)
 	

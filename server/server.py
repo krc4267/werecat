@@ -7,7 +7,14 @@ class Echo(protocol.Protocol):
     playing = False
     stopped = False
     queue = []
-	
+    
+    conf = {}
+    config = open('./wcserver.conf')
+    configlines = config.readlines()
+    for i in configlines:
+        print i.split(':')
+        conf [i.split(':')[0].strip()] = i.split(':')[1].strip()
+    
     def popenAndCall(self, onExit, popenArgs):
         def runInThread(onExit, popenArgs):
             print 'gothere'
@@ -80,6 +87,11 @@ class Echo(protocol.Protocol):
         if data.split(':')[0] == 'wants current':
             print 'sending current'
             self.transport.write('current:'+current)
+        
+        if data.split(':')[0] == 'reindex':
+            print 'starting indexer in second tmux'
+            os.system('tmux new-session -dt wc-indexer')
+     #       os.system('tmux send-keys -t wc-indexer g
 
             
     def playNext(self):
