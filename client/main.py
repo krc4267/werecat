@@ -26,27 +26,36 @@ from kivy.clock import Clock
 #index = open('index', 'r')
 
 class WerecatBase(App):
-    wcconf={}
+	
+    wcconf = {} #Before doing anything else, load the config. Not a clean function.. but it works.
+    config = open('./wcconf')
+    configlines = config.readlines()
+    for i in configlines:
+        print i.split(':')
+        wcconf [i.split(':')[0].strip()] = i.split(':')[1].strip()
+    print 'loaded configuration'
+    print wcconf
+    
     try:
         connected
     except NameError: connected = 0	
     
+    
     def build(self):
-        #self.read_config()
         print self.connected
         if self.connected == 1:
 			print 'BUILDING'
 			return(self.setup_gui())
         return(self.connectdialog())
-    def connectdialog(self):
-		
-		#FOR LATER IMPLEMENTATION
-		#FOR NOW SET THE SERVER IN THE CONFIG FILE
-		
+        
+        
+    def connectdialog(self): #This thing is kinda messy, but it works. Once the connection is established, the program loads the main GUI.
 		self.recentservers = open(self.wcconf["Recent Servers File Location"])
-		
-		self.default = 'default'
-		self.baselayout = BoxLayout(orientation='vertical')
+		try:
+			self.baselayout
+		except:
+			self.baselayout = BoxLayout(orientation='vertical')
+			
 		self.ipbox = TextInput(text='Enter server address:port here', multiline=False, size=(1,40), size_hint=(1, None), on_text_validate=self.connect_server_gui)
 		for i in self.recentservers.readlines():
 			print i
@@ -59,20 +68,12 @@ class WerecatBase(App):
 		
 		return self.baselayout
 		
-		#return self.setup_gui()
-#    def read_config(self):
-    wcconf = {'test': 603}
-    config = open('./wcconf')
-    configlines = config.readlines()
-    for i in configlines:
-        print i.split(':')
-        wcconf [i.split(':')[0].strip()] = i.split(':')[1].strip()
-    print 'loaded configuration'
-    print wcconf
+
+
+
 
     def setup_gui(self):
         self.wcmode = 'playing'
-#        self.baselayout = BoxLayout(orientation='vertical',padding=10)
         self.baselayout.clear_widgets()
         self.controlbuttonbox = BoxLayout(orientation='horizontal',size=(1,60),size_hint=(1,None))
         self.songscroll = ScrollView(size_hint=(.6,1))
@@ -111,6 +112,16 @@ class WerecatBase(App):
         self.baselayout.add_widget(self.statusbar)
         
         return self.baselayout
+        
+    def settings_panel(self): #Open Settings Panel --NOT DONE, DOES NOTHING, IS NEVER CALLED
+		self.baselayout.clear_widgets()
+		self.settingsbase = BoxLayout(orientation='horizontal')
+		self.baselayout.add_widget(self.settingsbase)
+		self.settingsbox = BoxLayout(orientation='vertical')
+		self.settingsdisplay = BoxLayout(orientation='vertical')
+		
+		
+		
     
     def sort_by_album(self, instance, *args):
         self.songbox.clear_widgets()
