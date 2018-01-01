@@ -107,18 +107,32 @@ class WerecatBase(App):
         return self.baselayout
     
     def sort_by_album(self, instance, *args):
-		self.songbox.clear_widgets()
-		self.songindex = open(self.wcconf['Playlist Directory']+'All Music', 'r')
-		self.songlist = self.songindex.readlines()
-		for i in self.songlist:
-			if i.split(';')[2] == instance.id.split(':')[1]:
-				self.songbox.add_widget(self.create_songdisplay(i))
+        self.songbox.clear_widgets()
+        self.songindex = open(self.wcconf['Playlist Directory']+'All Music', 'r')
+        self.albumsonglist = self.songindex.readlines()
+        self.songindex.close()
+        self.navbox = BoxLayout(orientation='horizontal', size=(1,40),size_hint=(1,None))
+        self.navbackbutton = Button(text='Back', size=(55,1), size_hint=(None, 1), on_press=self.back_to_previous_plist)
+        self.navreference = Label(text='Album: '+instance.id.split(':')[1])
+        self.navbox.add_widget(self.navbackbutton)
+        self.navbox.add_widget(self.navreference)
+        self.songbox.add_widget(self.navbox)
+        for i in self.songlist:
+            if i.split(';')[2] == instance.id.split(':')[1]:
+                self.songbox.add_widget(self.create_songdisplay(i))
 				
     def sort_by_artist(self, instance, *args):
         self.songbox.clear_widgets()
         self.songindex = open(self.wcconf['Playlist Directory']+'All Music', 'r')
-        self.songlist = self.songindex.readlines()
-        for i in self.songlist:
+        self.artistsonglist = self.songindex.readlines()
+        self.songindex.close()
+        self.navbox = BoxLayout(orientation='horizontal', size=(1,40),size_hint=(1,None))
+        self.navbackbutton = Button(text='Back', size=(55,1), size_hint=(None, 1), on_press=self.back_to_previous_plist)
+        self.navreference = Label(text='Artist: '+instance.id.split(':')[1])
+        self.navbox.add_widget(self.navbackbutton)
+        self.navbox.add_widget(self.navreference)
+        self.songbox.add_widget(self.navbox)
+        for i in self.artistsonglist:
             if i.split(';')[1] == instance.id.split(':')[1]:
                 self.songbox.add_widget(self.create_songdisplay(i))
 				
@@ -165,6 +179,9 @@ class WerecatBase(App):
 		self.listdisplay.add_widget(self.listbutton)
 		self.listdisplay.add_widget(self.editbutton)
 		return self.listdisplay
+	
+    def back_to_previous_plist(self, instance, *args):
+        self.render_songlist(self.songlist)
 	
     def render_songlist_parser(self, instance, *args):
         self.currentplaylist = instance.text
