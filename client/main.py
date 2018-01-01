@@ -4,7 +4,7 @@ install_twisted_reactor()
 
 from twisted.internet import reactor, protocol
 
-
+from operator import itemgetter
 
 
 		
@@ -115,12 +115,28 @@ class WerecatBase(App):
 				self.songbox.add_widget(self.create_songdisplay(i))
 				
     def sort_by_artist(self, instance, *args):
-		self.songbox.clear_widgets()
-		self.songindex = open(self.wcconf['Playlist Directory']+'All Music', 'r')
-		self.songlist = self.songindex.readlines()
+        self.songbox.clear_widgets()
+        self.songindex = open(self.wcconf['Playlist Directory']+'All Music', 'r')
+        self.songlist = self.songindex.readlines()
+        for i in self.songlist:
+            if i.split(';')[1] == instance.id.split(':')[1]:
+                self.songbox.add_widget(self.create_songdisplay(i))
+				
+    def sort_by_alphabet(self, instance, *args):
+        self.unsorted = self.songlist
+        self.songlist = sorted(self.unsorted, key=itemgetter(int(instance.id)))
+        self.render_songlist(self.songlist)
+        
+    def search_plist(self, instance):
+		self.searchedlist = []
+		self.searchterm = instance.text
+		print 'searching for: '+self.searchterm
 		for i in self.songlist:
-			if i.split(';')[1] == instance.id.split(':')[1]:
-				self.songbox.add_widget(self.create_songdisplay(i))
+			if str(self.searchterm).lower() in str(i).lower():
+				self.searchedlist.append(i)
+		
+		self.render_songlist(self.searchedlist)
+		
 
     def create_songdisplay(self, song):
         self.songdata = song.split(';')
@@ -144,22 +160,32 @@ class WerecatBase(App):
         
     def create_listdisplay(self, playlist):
 		self.listdisplay = BoxLayout(orientation='horizontal',size=(1,40),size_hint=(1,None))
-		self.listbutton = Button(text=playlist, on_press=self.render_songlist)
+		self.listbutton = Button(text=playlist, on_press=self.render_songlist_parser)
 		self.editbutton = Button(text='Edit', id=playlist, on_press=self.edit_playlist, size=(40,1), size_hint=(None, 1))
 		self.listdisplay.add_widget(self.listbutton)
 		self.listdisplay.add_widget(self.editbutton)
 		return self.listdisplay
+	
+    def render_songlist_parser(self, instance, *args):
+        self.currentplaylist = instance.text
+        self.songindexlocation = self.wcconf['Playlist Directory']+instance.text
+        self.songindex = open(self.songindexlocation, 'r')
+        self.songlist = self.songindex.readlines()
+        self.songindex.close()
+        self.render_songlist(self.songlist)
 		        
-    def render_songlist(self, instance, *args): #songindexlocation is the path to a text file produced by the indexer script
-		self.songbox.clear_widgets()
-		self.currentplaylist = instance.text
-		self.songindexlocation = self.wcconf['Playlist Directory']+instance.text
-		self.songindex = open(self.songindexlocation, 'r')
-		self.songlist = self.songindex.readlines()
-		self.songindex.close()
-		for i in self.songlist:
-			self.songbox.add_widget(self.create_songdisplay(i))
-			
+    def render_songlist(self, plist): #songindexlocation is the path to a text file produced by the indexer script
+        self.songbox.clear_widgets()
+        self.sortbuttons = BoxLayout(orientation='horizontal', size=(1,40),size_hint=(1,None))
+        self.alphabetbutton = Button(text='Sort by\nAlphabet', on_press=self.sort_by_alphabet, id=str(0))
+        self.searchbox = TextInput(multiline=False)
+        self.searchbox.bind(on_text_validate=self.search_plist)
+        self.sortbuttons.add_widget(self.alphabetbutton)
+        self.sortbuttons.add_widget(self.searchbox)
+        self.songbox.add_widget(self.sortbuttons)
+        for i in plist:
+            self.songbox.add_widget(self.create_songdisplay(i))
+            
     def render_listlist(self, indexdir=wcconf['Playlist Directory']):
         self.listbox.clear_widgets()
         for i in os.listdir(indexdir):
