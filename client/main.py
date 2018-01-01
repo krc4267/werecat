@@ -51,7 +51,10 @@ class WerecatBase(App):
 		for i in self.recentservers.readlines():
 			print i
 			self.baselayout.add_widget(Button(text=i, size_hint=(1, None), on_press=self.connect_server_gui))
-			
+		
+		self.statusbar = (Label(size=(1,20), size_hint=(1,None),text=''))
+		self.baselayout.add_widget(self.statusbar)
+
 		self.baselayout.add_widget(self.ipbox)
 		
 		return self.baselayout
@@ -103,6 +106,9 @@ class WerecatBase(App):
         self.render_queuelist('test:test:thing:test')
         
         self.render_listlist()
+        
+        self.statusbar = (Label(size=(1,20), size_hint=(1,None),text=''))
+        self.baselayout.add_widget(self.statusbar)
         
         return self.baselayout
     
@@ -269,10 +275,14 @@ class WerecatBase(App):
        
     def connect_server_gui(self, instance, *args):
         self.selected_server = instance.text
-        if len(self.selected_server.split(':')) != 1:
-            print 'server address invalid'
 			
-        self.serverport = int(instance.text.split(':')[1])
+        try:
+            self.serverport = int(instance.text.split(':')[1])
+        except:
+			print 'server address invalid'
+			self.statusbar.text = 'Invalid Server Address: '+self.selected_server.strip()
+			return 1
+			
         self.serveraddress = instance.text.split(':')[0]
         reactor.connectTCP(self.serveraddress, self.serverport, EchoClientFactory(self))
 
@@ -283,7 +293,7 @@ class WerecatBase(App):
         if self.selected_server not in self.recentserversfile.readlines():
             self.recentserversfile.write(self.selected_server+'\n')
         self.setup_gui()
-        self.baselayout.add_widget(Label(size=(1,40), size_hint=(1,None),text='Connected to server: '+self.selected_server))
+        self.baselayout.add_widget(Label(size=(1,20), size_hint=(1,None),text='Connected to server: '+self.selected_server.strip()))
         self.connected=1
         self.recentserversfile.close()
 	   
