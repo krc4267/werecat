@@ -27,33 +27,36 @@ from kivy.clock import Clock
 
 class WerecatBase(App):
     wcconf={}
-    connection = None
-   
+    try:
+        connected
+    except NameError: connected = 0	
+    
     def build(self):
         #self.read_config()
-        return self.connectdialog()
-        #return self.setup_gui()
-        
+        print self.connected
+        if self.connected == 1:
+			print 'BUILDING'
+			return(self.setup_gui())
+        return(self.connectdialog())
     def connectdialog(self):
 		
 		#FOR LATER IMPLEMENTATION
 		#FOR NOW SET THE SERVER IN THE CONFIG FILE
 		
-		#self.recentservers = open(self.wcconf["Recent Servers File Location"])
+		self.recentservers = open(self.wcconf["Recent Servers File Location"])
 		
-		#self.default = 'default'
-		#self.baselayout = BoxLayout(orientation='vertical')
-		#self.ipbox = TextInput(text=self.default, multiline=False, size_hint=(20, None))
-		#for i in self.recentservers.readlines():
-		#	print i
-		#	self.baselayout.add_widget(Button(text='thing', size_hint=(20, None)))
+		self.default = 'default'
+		self.baselayout = BoxLayout(orientation='vertical')
+		self.ipbox = TextInput(text='Enter server address:port here', multiline=False, size=(1,40), size_hint=(1, None), on_text_validate=self.connect_server_gui)
+		for i in self.recentservers.readlines():
+			print i
+			self.baselayout.add_widget(Button(text=i, size_hint=(1, None), on_press=self.connect_server_gui))
 			
-		#self.baselayout.add_widget(self.ipbox)
+		self.baselayout.add_widget(self.ipbox)
 		
-		#return self.baselayout
+		return self.baselayout
 		
-		return self.setup_gui()
-		
+		#return self.setup_gui()
 #    def read_config(self):
     wcconf = {'test': 603}
     config = open('./wcconf')
@@ -66,7 +69,8 @@ class WerecatBase(App):
 
     def setup_gui(self):
         self.wcmode = 'playing'
-        self.baselayout = BoxLayout(orientation='vertical',padding=10)
+#        self.baselayout = BoxLayout(orientation='vertical',padding=10)
+        self.baselayout.clear_widgets()
         self.controlbuttonbox = BoxLayout(orientation='horizontal',size=(1,60),size_hint=(1,None))
         self.songscroll = ScrollView(size_hint=(.6,1))
         self.listscroll = ScrollView(size_hint=(.2,1))
@@ -99,10 +103,6 @@ class WerecatBase(App):
         self.render_queuelist('test:test:thing:test')
         
         self.render_listlist()
-        
-        #TESTING
-        self.connectbutton = Button(text='connect', on_press=self.connect_server,size=(0,20),size_hint=(.4,None))
-        self.controlbuttonbox.add_widget(self.connectbutton)
         
         return self.baselayout
     
@@ -266,10 +266,26 @@ class WerecatBase(App):
 	
     def connect_server(self, *args):
         reactor.connectTCP(self.wcconf['Server Address'], int(self.wcconf['Server Port']), EchoClientFactory(self))
+       
+    def connect_server_gui(self, instance, *args):
+        self.selected_server = instance.text
+        if len(self.selected_server.split(':')) != 1:
+            print 'server address invalid'
+			
+        self.serverport = int(instance.text.split(':')[1])
+        self.serveraddress = instance.text.split(':')[0]
+        reactor.connectTCP(self.serveraddress, self.serverport, EchoClientFactory(self))
 
     def on_connection(self, connection):
         print 'connected'
         self.connection = connection
+        self.recentserversfile = open(self.wcconf['Recent Servers File Location'], 'a+')
+        if self.selected_server not in self.recentserversfile.readlines():
+            self.recentserversfile.write(self.selected_server+'\n')
+        self.setup_gui()
+        self.baselayout.add_widget(Label(size=(1,40), size_hint=(1,None),text='Connected to server: '+self.selected_server))
+        self.connected=1
+        self.recentserversfile.close()
 	   
     def send_message(self, *args):
         print 'sending message'
