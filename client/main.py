@@ -75,7 +75,7 @@ class WerecatBase(App):
     def setup_gui(self):
         self.wcmode = 'playing'
         self.baselayout.clear_widgets()
-        self.controlbuttonbox = BoxLayout(orientation='horizontal',size=(1,60),size_hint=(1,None))
+        self.controlbuttonbox = BoxLayout(orientation='horizontal',size=(1,80),size_hint=(1,None))
         self.songscroll = ScrollView(size_hint=(.6,1))
         self.listscroll = ScrollView(size_hint=(.2,1))
         self.queuescroll = ScrollView(size_hint=(.2,1))
@@ -321,9 +321,9 @@ class WerecatBase(App):
 		self.queueplaylistbutton = Button(text='Queue Whole\nPlaylist', on_press=self.queue_playlist)
 		self.status = Label(text='status display')
 		
-		self.volumebox = BoxLayout(orientation='vertical', size=(40,1), size_hint=(None, 1))
-		self.volumeupbutton = Button(text='Volume\nUp', id='volumeup', on_press=change_volume)
-		self.volumeupbutton = Button(text='Volume\nDown', id='volumedown', on_press=change_volume)
+		self.volumebox = BoxLayout(orientation='vertical', size=(60,1), size_hint=(None, 1))
+		self.volumeupbutton = Button(text='Volume\nUp', id='volumeup', on_press=self.change_volume)
+		self.volumedownbutton = Button(text='Volume\nDown', id='volumedown', on_press=self.change_volume)
 		self.volumebox.add_widget(self.volumeupbutton)
 		self.volumebox.add_widget(self.volumedownbutton)
 		
@@ -332,6 +332,7 @@ class WerecatBase(App):
 		self.controlbuttonbox.add_widget(self.skipbutton)
 		self.controlbuttonbox.add_widget(self.clearbutton)
 		self.controlbuttonbox.add_widget(self.queueplaylistbutton)
+		self.controlbuttonbox.add_widget(self.volumebox)
 	
 		pass
     def exit_editmode(self, *args):
