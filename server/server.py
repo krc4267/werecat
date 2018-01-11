@@ -31,7 +31,7 @@ class Echo(protocol.Protocol):
         
     def stopSong(self):
 		print 'stopping'
-		os.system('tmux send-keys -t werecat ^C')
+		os.system('tmux send-keys -t werecat q')
 		self.stopped = True
     
     def playSong(self, song):
@@ -92,6 +92,12 @@ class Echo(protocol.Protocol):
             print 'starting indexer in second tmux'
             os.system('tmux new-session -dt wc-indexer')
      #       os.system('tmux send-keys -t wc-indexer g
+     
+        if data.split(':')[0] == 'volume':
+            if data.split(':')[1] == 'up':
+                os.system('tmux send-keys -t werecat Up')
+            if data.split(':')[1] == 'down':
+                os.system('tmux send-keys -t werecat Down')
 
             
     def playNext(self):
@@ -123,7 +129,9 @@ class Echo(protocol.Protocol):
 			print 'inserting '+song+' to queue at position '+str(where)
 			self.queue.insert(where, song)
 			
-			
+    def getIndex(self):
+        if len(os.listdir(conf['New Song Directory'])) == 0:
+            self.transport.write('INDEX:generating
 			
 			
 class EchoFactory(protocol.Factory):

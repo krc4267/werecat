@@ -321,6 +321,12 @@ class WerecatBase(App):
 		self.queueplaylistbutton = Button(text='Queue Whole\nPlaylist', on_press=self.queue_playlist)
 		self.status = Label(text='status display')
 		
+		self.volumebox = BoxLayout(orientation='vertical', size=(40,1), size_hint=(None, 1))
+		self.volumeupbutton = Button(text='Volume\nUp', id='volumeup', on_press=change_volume)
+		self.volumeupbutton = Button(text='Volume\nDown', id='volumedown', on_press=change_volume)
+		self.volumebox.add_widget(self.volumeupbutton)
+		self.volumebox.add_widget(self.volumedownbutton)
+		
 		self.controlbuttonbox.add_widget(self.stopbutton)
 		self.controlbuttonbox.add_widget(self.playbutton)
 		self.controlbuttonbox.add_widget(self.skipbutton)
@@ -355,7 +361,12 @@ class WerecatBase(App):
         if self.when == 'next':
             self.connection.write('insert:'+str(instance.id.split(':')[1])+':0')
             Clock.schedule_once(self.get_queue, 0.25)
-
+    
+    def change_volume(self, instance, *args):
+		if instance.id == 'volumeup':
+			self.connection.write('volume:up')
+		if instance.id == 'volumedown':
+			self.connection.write('volume:down')
 	
     def stop(self,*args):
         self.connection.write('stop: ')
